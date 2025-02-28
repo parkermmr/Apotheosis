@@ -1,61 +1,118 @@
-import time
-import logging
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+import time
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
-from app.logging_config import setup_logging
+from util.logging.logger import Logger
 from app.metrics import setup_metrics
 from app.routers.metrics import router as metrics_router
 from app.routers.template import TemplateRouter
 
-setup_logging()
-
-info_logger = logging.getLogger("uvicorn.info")
-info_logger.setLevel(logging.INFO)
-debug_logger = logging.getLogger("uvicorn.error")
-debug_logger.setLevel(logging.DEBUG)
+middleware_logger = Logger("app.middleware", level=20, colored=True)
+error_logger = Logger("uvicorn.error", level=40, colored=True)
 
 
 class LoggingMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request, call_next):
+    """
+    Middleware for capturing request logs at varying levels
+    based on status codes and for logging errors.
+    """
+
+    async def dispatch(self, request: Request, call_next):
+        """
+        Processes incoming requests, measures response times,
+        and logs the outcome with the appropriate log level.
+        """
         start_time = time.time()
-        response = await call_next(request)
+        try:
+            response = await call_next(request)
+        except Exception as exc:
+            error_logger.error(
+                f"Error processing request {request.method} {request.url.path}: {exc}",
+                extra={"caller": "LoggingMiddleware.dispatch"},
+            )
+            raise
         process_time_ms = (time.time() - start_time) * 1000
         client_host = request.client.host if request.client else "unknown"
-        info_logger.info(
+        status_code = response.status_code
+        log_msg = (
             f'{client_host} - "{request.method} {request.url.path}" '
-            f'{response.status_code} - {process_time_ms:.2f}ms'
+            f"{status_code} - {process_time_ms:.2f}ms"
         )
+        if status_code >= 500:
+            middleware_logger.error(
+                log_msg,
+                extra={"caller": "LoggingMiddleware.dispatch"},
+            )
+        elif status_code >= 400:
+            middleware_logger.warning(
+                log_msg,
+                extra={"caller": "LoggingMiddleware.dispatch"},
+            )
+        else:
+            middleware_logger.info(
+                log_msg,
+                extra={"caller": "LoggingMiddleware.dispatch"},
+            )
         return response
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    info_logger.info("Starting application lifespan.")
-    yield
-    info_logger.info("Shutting down application lifespan.")
+    """
+    Manages the application lifespan events. Logs startup
+    and shutdown, and gracefully shuts down the app.
+    """
+    middleware_logger.info(
+        "Starting application lifespan.",
+        extra={"caller": "lifespan"},
+    )
+    try:
+        yield
+    finally:
+        middleware_logger.info(
+            "Shutting down application lifespan.",
+            extra={"caller": "lifespan"},
+        )
+        await app.state.shutdown()
 
 
 class App(FastAPI):
+    """
+    Custom FastAPI application that includes a lifespan context manager,
+    CORS middleware, logging middleware, static files, default routers,
+    and metrics setup.
+    """
+    _initialized_once = False
+
     def __init__(self) -> None:
+        """
+        Initializes the FastAPI app, sets up middleware, mounts static files,
+        includes routers, and logs a single initialization message.
+        """
         super().__init__(
             title="FastAPI Advanced Template",
             docs_url=None,
             redoc_url=None,
             openapi_url="/openapi.json",
-            lifespan=lifespan
+            lifespan=lifespan,
         )
-        self.add_middleware(CORSMiddleware,
-                            allow_origins=["*"],
-                            allow_credentials=True,
-                            allow_methods=["*"],
-                            allow_headers=["*"],
-                            )
+        self.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"],
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
         self.add_middleware(LoggingMiddleware)
         self.mount("/static", StaticFiles(directory="static"), name="static")
         self.include_router(metrics_router)
         self.include_router(TemplateRouter().router)
         setup_metrics(self)
-        info_logger.info("Application initialized.")
+        if not App._initialized_once:
+            App._initialized_once = True
+            middleware_logger.info(
+                "Application initialized.",
+                extra={"caller": "App.__init__"},
+            )

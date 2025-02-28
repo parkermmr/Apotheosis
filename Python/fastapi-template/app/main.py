@@ -2,6 +2,7 @@ from fastapi import HTTPException, Request
 from fastapi.responses import JSONResponse, FileResponse
 import uvicorn
 from app.app import App
+from util.logging.logging_config import LOGGING_CONFIG
 from fastapi.openapi.docs import (
     get_swagger_ui_html,
     get_swagger_ui_oauth2_redirect_html,
@@ -51,5 +52,15 @@ async def favicon() -> FileResponse:
     return FileResponse("static/favicorn.ico")
 
 
+def run() -> None:
+    uvicorn.run(
+        "app.main:app",
+        host="127.0.0.1",
+        port=8000,
+        reload=True,
+        log_config=LOGGING_CONFIG,
+    )
+
+
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    run()

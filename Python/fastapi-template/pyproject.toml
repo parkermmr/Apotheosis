@@ -6,7 +6,7 @@ build-backend = "poetry.core.masonry.api"
 name = "fastapi-template"
 version = "0.1.0"
 description = "A production-ready FastAPI template with advanced features."
-authors = ["Parker Rennie <parkerrennie@gmail.com>"]
+authors = ["Unknown"]
 package-mode = false
 
 [tool.poetry.dependencies]
