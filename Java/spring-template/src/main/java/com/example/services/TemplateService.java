@@ -1,10 +1,13 @@
 package com.example.services;
 
-import com.example.models.Template;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.springframework.stereotype.Service;
+
+import com.example.models.Template;
+import com.example.models.TemplateDTO;
 
 /** The template service */
 @Service
@@ -17,11 +20,12 @@ public class TemplateService {
   /**
    * Create a new template
    *
+   * @param template the template to create
    * @return the created template
    */
-  public Template createTemplate() {
-    Template template = new Template();
-    templates.put(template.getId(), template);
+  public Template createTemplate(Template template) {
+    String id = (String) template.getMetadataValue("id");
+    templates.put(id, template);
     return template;
   }
 
@@ -32,18 +36,29 @@ public class TemplateService {
    * @return the template
    */
   public Template getTemplate(String id) {
-    return templates.get(id);
+    Template template = templates.get(id);
+    if (template == null) {
+      throw new IllegalArgumentException("Template not found");
+    }
+    return template;
   }
 
   /**
    * Update a template by id
    *
    * @param id the id of the template
-   * @param template the updated template
+   * @param templateDTO the updated template
    * @return the updated template
    */
-  public Template updateTemplate(String id, Template template) {
-    templates.put(id, template);
+  public Template updateTemplate(String id, TemplateDTO templateDTO) {
+    Template template = templates.get(id);
+    if (template == null) {
+      throw new IllegalArgumentException("Template not found");
+    }
+
+    template.setDataValue("name", templateDTO.getName());
+    template.setDataValue("description", templateDTO.getDescription());
+
     return template;
   }
 
@@ -51,15 +66,19 @@ public class TemplateService {
    * Patch a template by id
    *
    * @param id the id of the template
-   * @param template the updated template
+   * @param templateDTO the updated template
    * @return the updated template
    */
-  public Template patchTemplate(String id, Template template) {
-    Template existing = templates.get(id);
-    if (template.getId() != null) {
-      existing.setId(template.getId());
+  public Template patchTemplate(String id, TemplateDTO templateDTO) {
+    Template template = templates.get(id);
+    if (template == null) {
+      throw new IllegalArgumentException("Template not found");
     }
-    return existing;
+
+    template.setDataValue("name", templateDTO.getName());
+    template.setDataValue("description", templateDTO.getDescription());
+
+    return template;
   }
 
   /**
