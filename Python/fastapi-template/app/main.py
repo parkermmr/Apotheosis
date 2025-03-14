@@ -20,6 +20,7 @@ async def custom_swagger_ui_html():
         oauth2_redirect_url=app.swagger_ui_oauth2_redirect_url,
         swagger_js_url="/static/swagger-ui-bundle.js",
         swagger_css_url="/static/swagger-ui.css",
+        swagger_favicon_url="/static/favicon.ico",
     )
 
 
@@ -34,6 +35,7 @@ async def redoc_html():
         openapi_url=app.openapi_url,
         title=f"{app.title} - ReDoc",
         redoc_js_url="/static/redoc.standalone.js",
+        redoc_favicon_url="/static/favicon.ico",
     )
 
 
@@ -47,9 +49,9 @@ async def root() -> dict:
     return {"msg": "You have reached the FastAPI template."}
 
 
-@app.get("/favicorn.ico", include_in_schema=False)
+@app.get("/favicon.ico", include_in_schema=False)
 async def favicon() -> FileResponse:
-    return FileResponse("static/favicorn.ico")
+    return FileResponse("/static/favicon.ico")
 
 
 def run() -> None:
