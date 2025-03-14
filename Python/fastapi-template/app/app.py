@@ -58,24 +58,45 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         return response
 
 
+class Lifespan:
+    """
+    Manages application lifespan events.
+    """
+
+    def __init__(self):
+        pass
+
+    async def startup(self):
+        """
+        Executes startup routine.
+        """
+        middleware_logger.info(
+            "Starting application lifespan.",
+            extra={"caller": "lifespan"},
+        )
+
+    async def shutdown(self):
+        """
+        Executes shutdown routines.
+        """
+        middleware_logger.info(
+            "Shutting down application lifespan.",
+            extra={"caller": "lifespan"},
+        )
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
     Manages the application lifespan events. Logs startup
     and shutdown, and gracefully shuts down the app.
     """
-    middleware_logger.info(
-        "Starting application lifespan.",
-        extra={"caller": "lifespan"},
-    )
+    app.state.lifespan = Lifespan()
     try:
+        await app.state.lifespan.startup()
         yield
     finally:
-        middleware_logger.info(
-            "Shutting down application lifespan.",
-            extra={"caller": "lifespan"},
-        )
-        await app.state.shutdown()
+        await app.state.lifespan.shutdown()
 
 
 class App(FastAPI):
