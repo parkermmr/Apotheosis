@@ -4,7 +4,7 @@ site_author: Parker
 site_url: https://apotheosis.pages.io.teampixl.info
 nav:
   - Home: index.md
-
+ 
 theme:
   name: material
   favicon: 'img/favicon.svg'
