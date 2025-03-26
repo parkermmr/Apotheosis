@@ -9,7 +9,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/parkermmr/apotheosis">
-     <img src="docs/img/logo.svg" alt="Logo" width="80" height="80">
+     <img src="docs/img/icon.svg" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">Apotheosis</h3>
