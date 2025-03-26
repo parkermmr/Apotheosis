@@ -17,8 +17,6 @@
   <p align="center">
     A full compilation of project ready templates for a range of languages and use cases.
     <br />
-    Made for GitHub Actions natively.
-    <br />
     <a href="https://apotheosis.pages.io.teampixl.info"><strong>Explore the docs »</strong></a>
     <br />
     <br />
