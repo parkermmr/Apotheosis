@@ -9,7 +9,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/parkermmr/apotheosis">
-     <img src="docs/img/logo.svg" alt="Logo" width="80" height="80" style="filter: invert(1);">
+     <img src="docs/img/logo.svg" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">Apotheosis</h3>
@@ -114,7 +114,7 @@
 
 
 [contributors-shield]: https://img.shields.io/github/contributors/parkermmr/apotheosis.svg?style=for-the-badge
-[ci-shield]: https://img.shields.io/github/actions/workflow/status/parkermmr/apotheosis/publish.yml?branch=main&style=for-the-badge
+[ci-shield]: https://img.shields.io/github/actions/workflow/status/parkermmr/apotheosis/compendium.yml?branch=main&style=for-the-badge
 [forks-shield]: https://img.shields.io/github/forks/parkermmr/apotheosis.svg?style=for-the-badge
 [stars-shield]: https://img.shields.io/github/stars/parkermmr/apotheosis.svg?style=for-the-badge
 [issues-shield]: https://img.shields.io/github/issues/parkermmr/apotheosis.svg?style=for-the-badge
